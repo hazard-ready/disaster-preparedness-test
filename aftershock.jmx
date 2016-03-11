@@ -56,7 +56,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">www.opb.org</stringProp>
+          <stringProp name="HTTPSampler.domain">hazardready.org</stringProp>
           <stringProp name="HTTPSampler.port"></stringProp>
           <stringProp name="HTTPSampler.connect_timeout">2000</stringProp>
           <stringProp name="HTTPSampler.response_timeout">20000</stringProp>
