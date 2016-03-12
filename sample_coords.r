@@ -1,43 +1,22 @@
 #!/usr/bin/env Rscript
 
-require('rgdal')
-require('plyr')
+library('rgdal')
+library('plyr')
 
-random_points <- function(geo_id, n) {
-  if (geo_id == "0") {   # all Oregon
-    poly <- or_area
-    n <- n * 1.20   # Increase N by 20% to account for overlap with populated areas
-  } else {
-    poly <- pop_areas[ pop_areas@data$GEOID10 == geo_id ,]
-  }
-  coordinates(spsample(poly, n, "random"))
+covered_area <- readOGR(dirname(sys.frame(1)$ofile), "boundary")
+batch_size <- 2500
+total <- 10000000
+
+random_points <- function(n) {
+  coordinates(spsample(covered_area, n, "random"))
 }
 
-pop_areas <- readOGR(".", "oregonPopulatedAreas")
-or_area <- readOGR(".", "oregon")
-pop_census_or <- 3831074
-outstanding_census <- pop_census_or - sum(pop_areas$POP)
+message(paste("Generating", total, "random points."))
 
-# Two lists used for weighted sampling of batches over the different distinct geographical areas
-# geo_ids contains ids of geographical areas
-# pops contains population for each area (used for weighting)
-geo_ids <- as.character(pop_areas$GEOID10)
-geo_ids[[length(geo_ids)+1]] <- 0                   # Append shape of all oregon
-pops <- as.integer(pop_areas$POP)
-pops[[length(pops)+1]] <- pop_census_or - sum(pops) # Assign weight with remaining population
-
-# In batches of batch_size up to total rows
-batch_size <- 250000
-total <- 10000000
+# Generate samples and merge into a single dataframe
 for (n in 1:(total/batch_size)) {
-  # Calculate how many samples we have to generate for each polygon area
-  samples_per_poly <- count(sample(geo_ids, batch_size, replace=TRUE, prob= pops))
-  # Generate samples and merge into a single dataframe
-  rez <- apply(samples_per_poly, 1, function(x) random_points(as.character(x[1]), as.integer(x[2])))
-  rez <- lapply(rez, function(l) data.frame(l))
-  rez <- Reduce(function(...) merge(..., all=T), rez)
-  # Shuffle the dataframe by rows and save
-  rez1 <- rez[sample(nrow(rez)),]
-  rownames(rez1) <- NULL
-  write.table(rez1, "coords.csv", col.names= FALSE, row.names= FALSE, append = TRUE)
+	rez <- t(apply(count(array(1:batch_size, c(batch_size, 1))), 1, function(x) random_points(1)))
+	rownames(rez) <- NULL
+	write.table(rez, paste(dirname(sys.frame(1)$ofile), "coords.csv", sep="/"), col.names= FALSE, row.names= FALSE, append = TRUE, sep = ",")
+	message(paste("Generated", n*batch_size, "points so far."))
 }

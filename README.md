@@ -11,8 +11,9 @@ Load testing setup for [aftershock](http://www.opb.org/aftershock)
 To use this to test your own server, simply do the following:
 
 1. Replace `boundary.shp` with a shapefile that represents the area you want to test.
-2. Run `sample_coords.r` to get a list of sample coordinates in that area.
-3. In `aftershock.jmx`, update the value of `<stringProp name="HTTPSampler.domain">` to match your server. **NB: this step is crucial, otherwise you'll be load-testing someone else's server, which is effectively a Denial Of Service attack.  Please don't do that!**
+2. If you have an existing `coords.csv` then delete it, because the next step will append instead of overwriting.
+3. Run `sample_coords.r` to get a list of sample coordinates in that area.
+4. In `aftershock.jmx`, update the value of `<stringProp name="HTTPSampler.domain">` to match your server. **NB: this step is crucial, otherwise you'll be load-testing someone else's server, which is effectively a Denial Of Service attack.  Please don't do that!**
 4. Use `coords.csv` as input for JMeter to test your deployment.
 
 ## Future work
