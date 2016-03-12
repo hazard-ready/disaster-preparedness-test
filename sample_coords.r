@@ -8,7 +8,15 @@ batch_size <- 2500
 total <- 10000000
 
 random_points <- function(n) {
-  coordinates(spsample(covered_area, n, "random"))
+	tryCatch({
+		coordinates(spsample(covered_area, n, "random"))
+	},
+	error = function(e) {
+		message("Intercepted the following error message:")
+		message(e)
+		message("Retrying.  If these messages keep coming in quick succession, then abort the script and debug.")
+		random_points(n)
+	})
 }
 
 message(paste("Generating", total, "random points."))
